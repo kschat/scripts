@@ -1,10 +1,5 @@
 #!/bin/sh
 
-branch_name="$(git rev-parse --abbrev-ref HEAD 2> /dev/null)"
-echo "$?"
-if [ "$?" -ne "0" ]; then
-  echo "Detacted HEAD - $1" > $1
-  exit 0
-fi
+branch_name="$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo Detacted HEAD)"
 
 echo "$branch_name - $1" > $1

@@ -91,14 +91,14 @@ if [ $repo_exists = false ]; then
   cd "$repo" && git remote add upstream "git@github.com:brandingbrand/$repo.git" || {
     exit 1
   }
-
-  log $info_color "Installing node dependencies"
-
-  npm install || {
-    exit 1
-  }
-
-  log $info_color "Starting node server"
 fi
+
+log $info_color "Installing node dependencies"
+
+npm install || {
+  exit 1
+}
+
+log $info_color "Starting node server"
 
 nodemon app.js $node_arguments

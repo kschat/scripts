@@ -65,6 +65,8 @@ if [ -n "$input_error_message" ]; then
   exit 1
 fi
 
+log $info_color "Checking if repo is already cloned"
+
 # check if repo was already cloned
 cd "${path}/${repo}" &> /dev/null && repo_exists=true
 

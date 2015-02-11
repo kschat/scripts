@@ -1,15 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 path="${@: -1}"
 session=""
 repo=""
 user=""
-api_url=localhost:4000
+node_arguments=""
+verbose=""
 
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
-      echo "usage: bb-session.sh [-u user] [-r repo] [-s session] [path]"
+      setup-bb-repo.sh -h
       exit 0
       ;;
     -u|--user)
@@ -22,9 +23,13 @@ while test $# -gt 0; do
       repo="$1"
       shift
       ;;
-    -s|--session)
+    -n|--node-args)
       shift
-      session="$1"
+      node_arguments="$1"
+      shift
+      ;;
+    -v|--verbose)
+      verbose="$1"
       shift
       ;;
     *)
@@ -33,44 +38,30 @@ while test $# -gt 0; do
   esac
 done
 
-session="${session:-$repo}"
+session=${session:-$repo}
+repo="$repo"
 
-if [ -z "$user" ]; then
-  echo "Must provide a username"
-  exit 1
-fi
-
-if [ -z "$path" ]; then
-  echo "Must provide a path"
-  exit 1
-fi
-
-function createWindow() {
-  url=$([ -n "$3" ] && echo "--url $3" || echo "")
-
-  tmux new-window -t "$1" -n 0
-  tmux split-window -h
-  
-  tmux send-keys -t 0 "cd ~/Workspace/BB;\
-    git clone git@github.com:$user/$2.git;\
-    cd $2;\
-    tmux select-window -t $1;\
-    tmux send-keys -t 1 \"\
-      cd ~/Workspace/BB/$2;\
-      git remote add upstream git@github.com:brandingbrand/$2.git;\
-      npm install; nodemon app.js $url\
-    \" C-m" C-m
-}
-
-(git ls-remote -h git@github.com:$user/$repo.m.git && git ls-remote -h git@github.com:$user/$repo.api.git) &> /dev/null || {
-  printf 'fork of "%s" doesn'"'"'t exist for user "%s"' $repo $user >&2
-  exit $?
-}
-
+#create new tmux session, but don't attach to it
 tmux -2 new -d -s "$session"
 
-createWindow "$session:0" "$repo.m" "$api_url"
+# create window for frontend and split it horizontally
+tmux new-window -t "$session:0" -n Frontend
+tmux split-window -h
 
-createWindow "$session:1" "$repo.api"
+# create window for API and split it horizontally
+tmux new-window -t "$session:1" -n API
+tmux split-window -h
+
+# select the API window and run `setup-bb-repo.sh` in the second pane
+tmux select-window -t 1
+tmux send-keys -t 1 "setup-bb-repo.sh $verbose -u $user -r $repo.api -n \"$node_arguments\" $path" C-m
+tmux send-keys -t 0 "cd $path/$repo.api"
+tmux select-pane -L
+
+# select the Frontend window and run `setup-bb-repo.sh` in the second pane
+tmux select-window -t 0
+tmux send-keys -t 1 "setup-bb-repo.sh $verbose -u $user -r $repo.m -n \"--url http://localhost:4000 $node_arguments\" $path" C-m
+tmux send-keys -t 0 "cd $path/$repo.m"
+tmux select-pane -L
 
 tmux -2 attach-session -t $session

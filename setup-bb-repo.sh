@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 path="${@: -1}"
-session=""
 repo=""
 user=""
 node_arguments=""
@@ -21,7 +20,7 @@ function log {
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
-      echo usage: bb-session.sh [-u user] [-r repo] [-s session] [-n node_arguments] path
+      echo usage: bb-session.sh [-u user] [-r repo] [-n node_arguments] path
       exit 0
       ;;
     -u|--user)
@@ -32,11 +31,6 @@ while test $# -gt 0; do
     -r|--repo)
       shift
       repo="$1"
-      shift
-      ;;
-    -s|--session)
-      shift
-      session="$1"
       shift
       ;;
     -n|--node)
@@ -53,8 +47,6 @@ while test $# -gt 0; do
       ;;
   esac
 done
-
-session="${session:-$repo}"
 
 [ -z "$user" ] && input_error_message+='Must provide a username '
 

@@ -45,23 +45,23 @@ repo="$repo"
 tmux -2 new -d -s "$session"
 
 # create window for frontend and split it horizontally
-tmux new-window -t "$session:0" -n Frontend
+tmux new-window -t "$session:1" -n Frontend
 tmux split-window -h
 
 # create window for API and split it horizontally
-tmux new-window -t "$session:1" -n API
+tmux new-window -t "$session:2" -n API
 tmux split-window -h
 
 # select the API window and run `setup-bb-repo.sh` in the second pane
-tmux select-window -t 1
-tmux send-keys -t 1 "setup-bb-repo.sh $verbose -u $user -r $repo.api -n \"$node_arguments\" $path" C-m
-tmux send-keys -t 0 "cd $path/$repo.api"
+tmux select-window -t 2
+tmux send-keys -t 2 "setup-bb-repo.sh $verbose -u $user -r $repo.api -n \"$node_arguments\" $path" C-m
+tmux send-keys -t 1 "cd $path/$repo.api"
 tmux select-pane -L
 
 # select the Frontend window and run `setup-bb-repo.sh` in the second pane
-tmux select-window -t 0
-tmux send-keys -t 1 "setup-bb-repo.sh $verbose -u $user -r $repo.m -n \"--url http://localhost:4000 $node_arguments\" $path" C-m
-tmux send-keys -t 0 "cd $path/$repo.m"
+tmux select-window -t 1
+tmux send-keys -t 2 "setup-bb-repo.sh $verbose -u $user -r $repo.m -n \"--url http://localhost:4000 $node_arguments\" $path" C-m
+tmux send-keys -t 1 "cd $path/$repo.m"
 tmux select-pane -L
 
 tmux -2 attach-session -t $session

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 pr_path=$1
-repo=$2
+repo="$(basename $(git rev-parse --show-toplevel))"
 
-[ -z "$pr_path" ] || [ -z "$repo" ] && exit 1
+[ -z "$pr_path" ] && exit 1
 
 IFS=':' read -a parts <<< "$pr_path"
 
